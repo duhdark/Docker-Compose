@@ -1,0 +1,9 @@
+services:
+  debian:
+    build: ./debian
+    restart: always
+    command: tail -f /dev/null
+
+networks:
+  app_network:
+    driver: bridge

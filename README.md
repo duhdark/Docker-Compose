@@ -1,1 +1,10 @@
-# testJob
+Debian          10
+GitLab          latest   ports: "81:80"
+Grafana         latest   ports: "3000:3000"
+MySQL           5.7      ports: "3306:3306"
+phpMyAdmin      latest   ports: "8081:80"
+NGINX           latest   ports: "80:80"
+PlantUML        latest   ports: "9999:9999"
+Prometheus      latest   ports: "9090:9090"
+node-exporter   latest   ports: "9100:9100"
+mysql-exporter  latest   ports: "9104:9104"
