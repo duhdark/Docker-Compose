@@ -119,9 +119,18 @@ services:
     container_name: gitlab
     hostname: gitlab
     volumes:
-      - ./gitlab/config:/etc/gitlab
-      - ./gitlab/logs:/var/log/gitlab
-      - ./gitlab/data:/var/opt/gitlab
+      - './gitlab/config:/etc/gitlab'
+      - './gitlab/logs:/var/log/gitlab'
+      - './gitlab/data:/var/opt/gitlab'
+      - './gitlab/plantuml:/opt/plantuml'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.example.com'
+        gitlab_rails['lfs_enabled'] = true
+        gitlab_pages['enable'] = true
+        gitlab_pages['inplace_chroot'] = true
+        gitlab_pages['domain'] = "pages.example.com"
+        gitlab_pages['https'] = false
     ports:
       - "90:80"
       - "443:443"
