@@ -116,14 +116,18 @@ services:
 
   gitlab:
     image: gitlab/gitlab-ce:latest
-    ports:
-      - "90:80"
-      - "443:443"
-      - "22:22"
+    container_name: gitlab
+    hostname: gitlab
     volumes:
       - ./gitlab/config:/etc/gitlab
       - ./gitlab/logs:/var/log/gitlab
       - ./gitlab/data:/var/opt/gitlab
+    ports:
+      - "90:80"
+      - "443:443"
+      - "22:22"
+    networks:
+      - my_network
 
 volumes:
   db_data:
