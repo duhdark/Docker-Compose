@@ -38,7 +38,7 @@ services:
       - my_network
 
   node-exporter:
-    image: prom/node-exporter
+    build: ./node_exporter
     container_name: node-exporter
     hostname: node-exporter
     restart: unless-stopped
@@ -82,7 +82,7 @@ services:
     hostname: mysql-exporter
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: 'user:password@(mysql-container-name:3306)/'
+      DATA_SOURCE_NAME: 'example_user:example_password@(mysql:3306)/example_db'
     ports:
       - "9104:9104"
     networks:
@@ -111,6 +111,40 @@ services:
       - grafana
     ports:
       - "80:80"
+    networks:
+      - my_network
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    hostname: gitlab
+    restart: unless-stopped
+    volumes:
+      - './gitlab/config:/etc/gitlab'
+      - './gitlab/logs:/var/log/gitlab'
+      - './gitlab/data:/var/opt/gitlab'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.example.com'
+        gitlab_rails['lfs_enabled'] = true
+        gitlab_pages['enable'] = true
+        gitlab_pages['inplace_chroot'] = true
+        gitlab_pages['domain'] = "pages.example.com"
+        gitlab_pages['https'] = false
+    ports:
+      - "90:80"
+      - "443:443"
+      - "22:22"
+    networks:
+      - my_network
+
+  plantuml:
+    image: think/plantuml
+    container_name: plantuml
+    hostname: plantuml
+    restart: unless-stopped
+    ports:
+      - "9999:8080"
     networks:
       - my_network
 

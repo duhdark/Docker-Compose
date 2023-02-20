@@ -1,2 +1,1 @@
-FROM plantuml/plantuml-server:latest
-EXPOSE 9999
+FROM hink/plantuml:latest
