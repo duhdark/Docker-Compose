@@ -1,9 +1,170 @@
 services:
-  debian:
-    build: ./debian
-    restart: always
-    command: tail -f /dev/null
+
+  grafana:
+    build: ./grafana
+    container_name: grafana
+    hostname: grafana
+    restart: unless-stopped
+    volumes:
+      - grafana-alerting:/var/lib/grafana/alerting/
+      - grafana-csv:/var/lib/grafana/csv/
+      - grafana-file-collections:/var/lib/grafana/collections/
+      - grafana-plugins:/var/lib/grafana/plugins/
+      - grafana-png:/var/lib/grafana/png/
+      - grafana-provisioning:/etc/grafana/provisioning/
+    user: root
+    environment:
+      TZ: "Europe/Moscow"
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
+
+  prometheus:
+    build: ./prometheus
+    container_name: prometheus
+    hostname: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus/
+    environment:
+      TZ: "Europe/Moscow"
+    depends_on:
+      - node-exporter
+      - mysql-exporter
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - my_network
+
+  node-exporter:
+    build: ./node_exporter
+    container_name: node-exporter
+    hostname: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    environment:
+      TZ: "Europe/Moscow"
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.ignored-mount-points
+      - ^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)
+    ports:
+      - "9100:9100"
+    networks:
+      - my_network
+
+  mysql:
+    build: ./mysql
+    container_name: mysql
+    hostname: mysql
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: example_password
+      MYSQL_DATABASE: example_db
+      MYSQL_USER: example_user
+      MYSQL_PASSWORD: example_password
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    networks:
+      - my_network
+
+  mysql-exporter:
+    build: ./mysql_exporter
+    container_name: mysql-exporter
+    hostname: mysql-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: 'example_user:example_password@(mysql:3306)/example_db'
+    ports:
+      - "9104:9104"
+    networks:
+      - my_network
+
+  phpmyadmin:
+    build: ./phpmyadmin
+    container_name: phpmyadmin
+    hostname: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+    ports:
+      - "8081:80"
+    networks:
+      - my_network
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    hostname: nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - grafana
+    ports:
+      - "80:80"
+    networks:
+      - my_network
+
+  gitlab:
+    build: ./gitlab
+    container_name: gitlab
+    hostname: gitlab
+    restart: unless-stopped
+    volumes:
+      - 'gitlab-config:/etc/gitlab'
+      - 'gitlab-logs:/var/log/gitlab'
+      - 'gitlab-data:/var/opt/gitlab'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.example.com'
+        gitlab_rails['lfs_enabled'] = true
+        gitlab_pages['enable'] = true
+        gitlab_pages['inplace_chroot'] = true
+        gitlab_pages['domain'] = "pages.example.com"
+        gitlab_pages['https'] = false
+        gitlab_rails['plantuml_enabled'] = true
+        gitlab_rails['plantuml_url'] = 'http://plantuml:8080/svg/'
+    ports:
+      - "90:80"
+      - "443:443"
+      - "22:22"
+    networks:
+      - my_network
+
+  plantuml:
+    build: ./plantuml
+    container_name: plantuml
+    restart: unless-stopped
+    ports:
+      - "9999:8080"
+    networks:
+      - my_network
+
+volumes:
+  grafana-alerting:
+  grafana-csv:
+  grafana-file-collections:
+  grafana-plugins:
+  grafana-png:
+  grafana-provisioning:
+  db_data:
+  gitlab-config:
+  gitlab-logs:
+  gitlab-data:
 
 networks:
-  app_network:
+  my_network:
     driver: bridge
