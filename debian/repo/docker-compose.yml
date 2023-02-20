@@ -6,8 +6,12 @@ services:
     hostname: grafana
     restart: unless-stopped
     volumes:
-      - ./grafana:/var/lib/grafana
-      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - grafana-alerting:/var/lib/grafana/alerting/
+      - grafana-csv:/var/lib/grafana/csv/
+      - grafana-file-collections:/var/lib/grafana/collections/
+      - grafana-plugins:/var/lib/grafana/plugins/
+      - grafana-png:/var/lib/grafana/png/
+      - grafana-provisioning:/etc/grafana/provisioning/
     user: root
     environment:
       TZ: "Europe/Moscow"
@@ -120,9 +124,9 @@ services:
     hostname: gitlab
     restart: unless-stopped
     volumes:
-      - './gitlab/config:/etc/gitlab'
-      - './gitlab/logs:/var/log/gitlab'
-      - './gitlab/data:/var/opt/gitlab'
+      - 'gitlab-config:/etc/gitlab'
+      - 'gitlab-logs:/var/log/gitlab'
+      - 'gitlab-data:/var/opt/gitlab'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'http://gitlab.example.com'
@@ -154,6 +158,12 @@ volumes:
   gitlab-config:
   gitlab-logs:
   gitlab-data:
+  grafana-alerting:
+  grafana-csv:
+  grafana-file-collections:
+  grafana-plugins:
+  grafana-png:
+  grafana-provisioning:
 
 networks:
   my_network:
