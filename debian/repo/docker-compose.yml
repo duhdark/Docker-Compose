@@ -131,6 +131,8 @@ services:
         gitlab_pages['inplace_chroot'] = true
         gitlab_pages['domain'] = "pages.example.com"
         gitlab_pages['https'] = false
+        gitlab_rails['plantuml_enabled'] = true
+        gitlab_rails['plantuml_url'] = 'http://plantuml:8080/svg/'
     ports:
       - "90:80"
       - "443:443"
@@ -139,9 +141,8 @@ services:
       - my_network
 
   plantuml:
-    image: think/plantuml
+    build: ./plantuml
     container_name: plantuml
-    hostname: plantuml
     restart: unless-stopped
     ports:
       - "9999:8080"
@@ -150,6 +151,9 @@ services:
 
 volumes:
   db_data:
+  gitlab-config:
+  gitlab-logs:
+  gitlab-data:
 
 networks:
   my_network:

@@ -1,1 +1,1 @@
-FROM hink/plantuml:latest
+FROM plantuml/plantuml-server:jetty
